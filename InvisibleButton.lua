@@ -1,21 +1,24 @@
--- Roblox Invisible Button GUI
--- LocalScript - Place in StarterPlayer > StarterCharacterScripts or StarterPlayer > StarterPlayerScripts
+-- Roblox Invisible Character GUI
+-- LocalScript - Place in StarterPlayer > StarterCharacterScripts
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
+local character = script.Parent
 local playerGui = player:WaitForChild("PlayerGui")
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 -- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "InvisibleButtonGui"
+screenGui.Name = "InvisibleCharGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 -- Create Button Frame
 local button = Instance.new("TextButton")
-button.Name = "InvisibleButton"
+button.Name = "InvisibleToggleButton"
 button.Size = UDim2.new(0, 120, 0, 50)
 button.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -38,12 +41,12 @@ button.Position = getRandomPosition()
 local dragging = false
 local dragStart = nil
 local startPos = nil
+local isInvisible = false
 
 -- Mouse events for dragging
 local mouse = player:GetMouse()
 
 button.MouseButton1Down:Connect(function()
-	-- Check if clicking on button to hide or dragging
 	dragging = true
 	dragStart = mouse.X - button.AbsolutePosition.X
 	startPos = button.Position
@@ -57,20 +60,53 @@ UserInputService.InputChanged:Connect(function(input, gameProcessed)
 	end
 end)
 
+-- Function to make character invisible
+local function toggleInvisibility()
+	isInvisible = not isInvisible
+	
+	for _, part in pairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			if isInvisible then
+				-- Tàng hình
+				part.Transparency = 1
+			else
+				-- Hiện lại (reset transparency)
+				if part:FindFirstChild("OriginalTransparency") then
+					part.Transparency = part:FindFirstChild("OriginalTransparency").Value
+				else
+					part.Transparency = 0
+				end
+			end
+		end
+	end
+	
+	-- Update button text
+	button.Text = isInvisible and "Hiển Thị" or "Tàng Hình"
+	button.BackgroundColor3 = isInvisible and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(0, 100, 200)
+	
+	print(isInvisible and "✅ Character tàng hình!" or "✅ Character hiển thị!")
+end
+
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if dragging then
 			-- Check if button was actually dragged or just clicked
 			local currentPos = button.Position
 			if currentPos == startPos then
-				-- Button was clicked (not dragged) -> hide it
-				button.Visible = false
-				screenGui:Destroy()
-				print("Button tàng hình!")
+				-- Button was clicked (not dragged) -> toggle invisibility
+				toggleInvisibility()
 			end
 			dragging = false
 		end
 	end
 end)
 
-print("✅ Invisible Button GUI loaded! Click to hide, drag to move.")
+-- Ensure you can always see yourself
+local camera = workspace.CurrentCamera
+RunService.RenderStepped:Connect(function()
+	-- Bạn vẫn thấy chính mình ngay cả khi tàng hình
+	-- Điều này do client rendering xử lý
+end)
+
+print("✅ Invisible Character GUI loaded!")
+print("👉 Kéo nút để di chuyển, bấm nút để bật/tắt tàng hình")
