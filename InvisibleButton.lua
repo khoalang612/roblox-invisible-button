@@ -1,16 +1,38 @@
 -- Roblox Invisible Character GUI
--- LocalScript - Place in StarterPlayer > StarterCharacterScripts or StarterPlayerScripts
+-- LocalScript - Can be placed anywhere
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
--- Wait for character to load
-local character = player.Character or player.CharacterAdded:Wait()
-local playerGui = player:WaitForChild("PlayerGui")
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+-- Wait for PlayerGui first
+if not player:WaitForChild("PlayerGui", 5) then
+	print("❌ Error: PlayerGui tidak load!")
+	return
+end
+
+-- Then wait for character
+local character = player.Character
+if not character then
+	print("⏳ Chờ character load...")
+	character = player.CharacterAdded:Wait()
+end
+
+print("✅ Character loaded!")
+
+-- Check if HumanoidRootPart exists
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+if not humanoidRootPart then
+	print("❌ Error: HumanoidRootPart không tìm thấy!")
+	return
+end
+
+local playerGui = player:FindFirstChild("PlayerGui")
+if not playerGui then
+	print("❌ Error: PlayerGui không tìm thấy!")
+	return
+end
 
 -- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -73,11 +95,7 @@ local function toggleInvisibility()
 				part.Transparency = 1
 			else
 				-- Hiện lại (reset transparency)
-				if part:FindFirstChild("OriginalTransparency") then
-					part.Transparency = part:FindFirstChild("OriginalTransparency").Value
-				else
-					part.Transparency = 0
-				end
+				part.Transparency = 0
 			end
 		end
 	end
