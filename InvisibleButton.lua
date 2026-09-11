@@ -1,12 +1,14 @@
 -- Roblox Invisible Character GUI
--- LocalScript - Place in StarterPlayer > StarterCharacterScripts
+-- LocalScript - Place in StarterPlayer > StarterCharacterScripts or StarterPlayerScripts
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
-local character = script.Parent
+
+-- Wait for character to load
+local character = player.Character or player.CharacterAdded:Wait()
 local playerGui = player:WaitForChild("PlayerGui")
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
@@ -99,13 +101,6 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 			dragging = false
 		end
 	end
-end)
-
--- Ensure you can always see yourself
-local camera = workspace.CurrentCamera
-RunService.RenderStepped:Connect(function()
-	-- Bạn vẫn thấy chính mình ngay cả khi tàng hình
-	-- Điều này do client rendering xử lý
 end)
 
 print("✅ Invisible Character GUI loaded!")
